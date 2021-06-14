@@ -17,7 +17,7 @@ $results.Properties | foreach {$_} | foreach {
       $fromjson=($contents.responseBody | ConvertFrom-Json)
       $newobj = New-Object psobject
       $newobj | Add-Member NoteProperty VmId $fromjson.properties.vmId
-      $newobj | Add-Member NoteProperty Vmsize $fromjson.properties.hardwareprofile.vmsize
+      $newobj | Add-Member NoteProperty VmSize $fromjson.properties.hardwareprofile.vmsize
       $newobj
       }
 }
