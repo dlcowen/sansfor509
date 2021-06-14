@@ -8,7 +8,7 @@
 
 
 # By default get-azlog will only show 1000 events that took place 7 days from the current date/time
-# You may want to specific a specific date range, example: -StartTime 2021-03-31T00:00 -EndTime 2021-04-02T00:00
+# Specify a relevant date range, example: -StartTime 2021-03-31T00:00 -EndTime 2021-04-02T00:00
 
 $results = get-azlog -ResourceProvider "Microsoft.Compute" -DetailedOutput -StartTime 2021-03-31T00:00 -EndTime 2021-04-02T00:00
 $results.Properties | foreach {$_} | foreach {
