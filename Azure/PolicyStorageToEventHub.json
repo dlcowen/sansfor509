@@ -189,8 +189,7 @@
         "type": "String",
         "metadata": {
           "displayName": "Event Hub Name",
-          "description": "The Event Hub Name",
-          "strongType": "Microsoft.EventHub/Namespaces/EventHubs"
+          "description": "The Event Hub Name"
         },
         "defaultValue": ""
       },
