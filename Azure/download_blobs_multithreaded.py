@@ -73,8 +73,12 @@ class AzureBlobFileDownloader:
                                     
     with open(download_file_path, "wb") as file:
       file.write(bytes)
+    # To delete the blob once downloaded:
+    #  - useful if you want to download logs with a cron job (so you don't re-download every blob in the storage account each time)
+    #  - make sure it's the same indent as the "with" line
+    #  - uncomment the next line
+    #self.my_container.get_blob_client(blob).delete_blob()
     return file_name
-
 
 # Initialize class and upload files
 azure_blob_file_downloader = AzureBlobFileDownloader()
