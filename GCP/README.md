@@ -3,7 +3,7 @@
 The below details how to collect logs from a GCP project via command line.
 
 ## Requirements
-* An Account with `Private Log Viewer` permissions
+* An Account with `Private Logs Viewer` permissions
 * [gconsole installed](https://cloud.google.com/sdk/docs/install)
 
 
