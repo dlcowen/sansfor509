@@ -1,0 +1,17 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+*/.env
+.env
+*/.gitignore
+
+git_data/**
+.DS_Store
+
+.vscode/**
+
+#secrets
+token.pickle
+credentials.json
