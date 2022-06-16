@@ -1,0 +1,8 @@
+google-api-core==1.22.2
+google-api-python-client
+google-auth==1.21.1
+google-auth-httplib2==0.0.4
+google-auth-oauthlib==0.4.1
+googleapis-common-protos==1.52.0
+openpyxl==3.0.5
+xlrd >= 1.0.0

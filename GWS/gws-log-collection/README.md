@@ -1,0 +1,1 @@
+# Google Workspace Log Collection

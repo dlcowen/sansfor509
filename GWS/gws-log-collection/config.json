@@ -1,0 +1,5 @@
+{
+    "creds_path": "./credentials.json",
+    "delegated_creds": "user@domain.com",
+    "output_path": "."
+}
