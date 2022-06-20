@@ -3,7 +3,7 @@ Graph API is an extremely powerful way to interact with the Microsoft 365 cloud.
 We selected a few of example that you may find interesting and provide the PowerShell code used to generate the Graph API calls.
 We hope that you can use this code to learn more about Graph API and leverage its power in your own environment.
 
-To issue this Graph API calls, you must have an existing application defined and approved as well as an associated secret (ie. password).
+To issue these Graph API calls, you must have an existing approved application defined as well as an associated secret (ie. password).
 
 
 ### Explore the Graph API
@@ -11,11 +11,9 @@ To issue this Graph API calls, you must have an existing application defined and
 
 ***Install the authentication library PowerShell module***
 
-    ```
     Install-Module -Name MSAL.PS -RequiredVersion 4.2.1.3 -Scope CurrentUser
-    ```
     
-    For more information, see https://www.powershellgallery.com/packages/MSAL.PS/4.2.1.3
+For more information, see https://www.powershellgallery.com/packages/MSAL.PS/4.2.1.3
 
 ***Request a token***  
 
