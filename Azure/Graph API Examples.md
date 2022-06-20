@@ -67,12 +67,10 @@ Sample output from the FOR509 class. You will need the id of your targeted user 
 
 ***Get list of groups***
 
-    ```
     $apiUri = "https://graph.microsoft.com/v1.0/groups"
     $response = Invoke-RestMethod -Headers $Headers -Uri $apiUri -Method GET
     $groups = ($response | Select-Object Value).Value 
     $groups | Format-Table displayName,id
-    ```
 
 Sample output from the FOR509 class. You will need the id of the targeted group.
 
