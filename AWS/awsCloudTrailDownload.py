@@ -62,7 +62,7 @@ def main(args):
                 token_file.write(page["NextToken"]) 
                 StartingToken = page["NextToken"]
             except KeyError:
-                exit()
+                continue
             print("Total Logs downloaded: ",total_logs)
             total_logs = total_logs +50
 
