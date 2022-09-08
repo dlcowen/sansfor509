@@ -6,13 +6,16 @@
 # Copyright: David Cowen 2022
 
 from __future__ import print_function
-import boto3, argparse, os, sys, json, time
+import boto3, argparse, os, sys, json, time, random, string, gzip
 from botocore.exceptions import ClientError
+from datetime import datetime, timezone
 
 def main(args):
     access_key_id = args.access_key_id
     secret_access_key = args.secret_key
     session_token = args.session_token
+
+    random_source = string.ascii_letters + string.digits
 
     if args.access_key_id is None or args.secret_key is None:
         print('IAM keys not passed in as arguments, enter them below:')
@@ -30,44 +33,69 @@ def main(args):
         aws_access_key_id=access_key_id,
         aws_secret_access_key=secret_access_key,
         aws_session_token=session_token,
-        region_name="us-east-1"
+        region_name = 'us-east-1'
         )
     total_logs = 0
     regions = client.describe_regions()
-    
-    for r in regions['Regions']:
-        print("\n\rCurrent region:",r['RegionName'])
+
+    for region in regions['Regions']:
+        region_name = region['RegionName']
+        print('\n\rCurrent region: %s' % (region_name))
+
+        accountid_client = boto3.client(
+            'sts',
+            aws_access_key_id = access_key_id,
+            aws_secret_access_key = secret_access_key,
+            aws_session_token = session_token,
+            region_name = region_name)
+
         client = boto3.client(
-        'cloudtrail',
-        aws_access_key_id=access_key_id,
-        aws_secret_access_key=secret_access_key,
-        aws_session_token=session_token,
-        region_name=r['RegionName']
-        )
+            'cloudtrail',
+            aws_access_key_id = access_key_id,
+            aws_secret_access_key = secret_access_key,
+            aws_session_token = session_token,
+            region_name = region_name)
+
         paginator = client.get_paginator('lookup_events')
 
         StartingToken = None
-        
-        data={} 
-        data['Records'] = []
+
+        timestamp = datetime.now().strftime('%Y%m%dT%H%M%SZ')
+        account_id = accountid_client.get_caller_identity()["Account"]
+
         page_iterator = paginator.paginate(
             LookupAttributes=[],
-            PaginationConfig={'PageSize':50, 'StartingToken':StartingToken })
+            PaginationConfig={ 'PageSize':50, 'StartingToken':StartingToken })
+
         for page in page_iterator:
-            filename = r['RegionName']+str(total_logs)+'cloudtrail.json'
-            cloudTraillogs = open(filename, "w")
-            for event in page["Events"]:
-                data['Records'].append(event["CloudTrailEvent"])
-                
+
+            data={}
+            data['Records'] = []
+
+            if len(page['Events']) == 0:
+                continue
+
+            unique_string = ''
+            for i in range(16):
+                unique_string += random.choice(random_source)
+
+            filename = '%s_CloudTrail_%s_%s_%s.json.gz' % (account_id, region_name, timestamp, unique_string)
+            cloudTraillogs = gzip.open(filename, 'w')
+
+            for event in page['Events']:
+                data['Records'].append(json.loads(event['CloudTrailEvent']))
+
+            cloudTraillogs.write(json.dumps(data).encode('utf-8'))
+            cloudTraillogs.close()
+            total_logs = total_logs + len(page['Events'])
+            print('\rTotal Logs downloaded: %s' % (total_logs), end='',flush=True)
+
             try:
-                token_file = open("token","w") 
-                token_file.write(page["NextToken"]) 
-                StartingToken = page["NextToken"]
+                token_file = open('token','w')
+                token_file.write(page['NextToken'])
+                StartingToken = page['NextToken']
             except KeyError:
                 continue
-            cloudTraillogs.write(json.dumps(data))
-            print("\rTotal Logs downloaded: ",total_logs, end='',flush=True)
-            total_logs = total_logs +50
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='This script will fetch the last 90 days of cloudtrail logs.')
