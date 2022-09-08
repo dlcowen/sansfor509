@@ -25,7 +25,6 @@ def main(args):
     # Begin permissions enumeration
 
 
-    cloudTraillogs = open("90days.json","w")
     client = boto3.client(
         'ec2',
         aws_access_key_id=access_key_id,
@@ -37,6 +36,8 @@ def main(args):
     
     for r in regions['Regions']:
         print("Current region:",r['RegionName'])
+        filename = r['RegionName']+'cloudtrail.json'
+        cloudTraillogs = open(filename, "w")
         client = boto3.client(
         'cloudtrail',
         aws_access_key_id=access_key_id,
@@ -48,14 +49,13 @@ def main(args):
 
         StartingToken = None
         
-        
+        data=[] 
         page_iterator = paginator.paginate(
             LookupAttributes=[],
             PaginationConfig={'PageSize':50, 'StartingToken':StartingToken })
         for page in page_iterator:
             for event in page["Events"]:
-                cloudTraillogs.write(str(event))
-                
+                cloudTraillogs.write(event["CloudTrailEvent"])
                 
             try:
                 token_file = open("token","w") 
@@ -65,7 +65,6 @@ def main(args):
                 continue
             print("Total Logs downloaded: ",total_logs)
             total_logs = total_logs +50
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='This script will fetch the last 90 days of cloudtrail logs.')
