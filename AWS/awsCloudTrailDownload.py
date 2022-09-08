@@ -35,9 +35,7 @@ def main(args):
     regions = client.describe_regions()
     
     for r in regions['Regions']:
-        print("Current region:",r['RegionName'])
-        filename = r['RegionName']+'cloudtrail.json'
-        cloudTraillogs = open(filename, "w")
+        print("\n\rCurrent region:",r['RegionName'])
         client = boto3.client(
         'cloudtrail',
         aws_access_key_id=access_key_id,
@@ -49,13 +47,16 @@ def main(args):
 
         StartingToken = None
         
-        data=[] 
+        data={} 
+        data['Records'] = []
         page_iterator = paginator.paginate(
             LookupAttributes=[],
             PaginationConfig={'PageSize':50, 'StartingToken':StartingToken })
         for page in page_iterator:
+            filename = r['RegionName']+str(total_logs)+'cloudtrail.json'
+            cloudTraillogs = open(filename, "w")
             for event in page["Events"]:
-                cloudTraillogs.write(event["CloudTrailEvent"])
+                data['Records'].append(event["CloudTrailEvent"])
                 
             try:
                 token_file = open("token","w") 
@@ -63,7 +64,8 @@ def main(args):
                 StartingToken = page["NextToken"]
             except KeyError:
                 continue
-            print("Total Logs downloaded: ",total_logs)
+            cloudTraillogs.write(json.dumps(data))
+            print("\rTotal Logs downloaded: ",total_logs, end='',flush=True)
             total_logs = total_logs +50
 
 if __name__ == '__main__':
