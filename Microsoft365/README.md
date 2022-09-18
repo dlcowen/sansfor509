@@ -31,7 +31,7 @@ Connect-ExchangeOnline –UserPrincipalName <UPN> -ShowProgress $true
 ## Search for all events and return results as JSON
 `Search-UnifiedAuditLog –StartDate 2020-01-01 –EndDate 2020-02-28 –SessionCommand ReturnLargeSet -ResultSize 5000 | Select-Object –ExpandProperty AuditData`
 
-## Verify that mailbox autiding is on
+## Verify that mailbox auditing is on
 `Get-OrganizationConfig | Format-List AuditDisabled`
 
 ## Check specific mailbox (admin in this example) auditing configuration
