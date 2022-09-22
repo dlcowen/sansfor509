@@ -7,13 +7,12 @@
 # Copyright: David Cowen 2022
 
 from __future__ import print_function
-import boto3, argparse, os, sys, json, time, random, string, gzip, multiprocessing
+import boto3, argparse, os, sys, json, time, random, string, gzip, multiprocessing, curses
 from botocore.exceptions import ClientError
 from datetime import datetime, timezone
 from multiprocessing import Process, TimeoutError, parent_process, Pipe
 
-def regionDownload(access_key_id, secret_access_key, session_token, region_name,random_source, conn):
-    print('\n\rCurrent region: %s' % (region_name))
+def regionDownload(access_key_id, secret_access_key, session_token, region_name, conn):
 
     accountid_client = boto3.client(
         'sts',
@@ -39,19 +38,16 @@ def regionDownload(access_key_id, secret_access_key, session_token, region_name,
     page_iterator = paginator.paginate(
         LookupAttributes=[],
         PaginationConfig={ 'PageSize':50, 'StartingToken':StartingToken })
-    filename = '%s_CloudTrail_%s_%s.json.gz' % (account_id, region_name, timestamp)
-    cloudTraillogs = gzip.open(filename, 'w')
-    for page in page_iterator:
 
+    for page in page_iterator:
+        filename = '%s_CloudTrail_%s_%s_%s.json.gz' % (account_id, region_name, timestamp,total_logs)
+        cloudTraillogs = gzip.open(filename, 'w')
         data={}
         data['Records'] = []
 
         if len(page['Events']) == 0:
             continue
 
-        #unique_string = ''
-        #for i in range(16):
-        #    unique_string += random.choice(random_source)
 
         
 
@@ -59,24 +55,26 @@ def regionDownload(access_key_id, secret_access_key, session_token, region_name,
             data['Records'].append(json.loads(event['CloudTrailEvent']))
 
         cloudTraillogs.write(json.dumps(data).encode('utf-8'))
-        #cloudTraillogs.close()
+        
         total_logs = total_logs + len(page['Events'])
         #print('\rTotal Logs downloaded: %s' % (total_logs), end='',flush=True)
         conn.put([region_name, total_logs])
-
+        cloudTraillogs.close()
         try:
-            token_file = open('token','w')
+            token_filename = region_name + 'token'
+            token_file = open(token_filename,'w')
             token_file.write(page['NextToken'])
             StartingToken = page['NextToken']
         except KeyError:
             continue
+
+    
 
 def main(args):
     access_key_id = args.access_key_id
     secret_access_key = args.secret_key
     session_token = args.session_token
 
-    random_source = string.ascii_letters + string.digits
 
     if args.access_key_id is None or args.secret_key is None:
         print('IAM keys not passed in as arguments, enter them below:')
@@ -86,8 +84,13 @@ def main(args):
         if session_token.strip() == '':
             session_token = None
 
-    # Begin permissions enumeration
-
+    stdscr = curses.initscr()
+    stdscr.border(0)
+    stdscr.addstr(0, 0, 'Downloading AWS CloudTrail logs from All Regions', curses.A_BOLD)
+    stdscr.addstr(1, 1, 'Press q to quit', curses.A_BOLD)
+    stdscr.nodelay(1)
+    curses.cbreak()
+    
 
     client = boto3.client(
         'ec2',
@@ -98,19 +101,26 @@ def main(args):
         )
     total_logs = 0
     regions = client.describe_regions()
-    
-    #parent_conn = ()
-    
+    regionindex = {}
+    region_count = 2
     n = multiprocessing.Queue()
 
     for region in regions['Regions']:
         region_name = region['RegionName']
-        #parent_conn[region_name], child_conn = Pipe()
-        Process(target=regionDownload, args=(access_key_id,secret_access_key, session_token, region_name,random_source, n)).start()
+        regionindex[region_name]=region_count
+        Process(target=regionDownload, args=(access_key_id,secret_access_key, session_token, region_name, n)).start()
+        stdscr.addstr(int(regionindex[region_name]), 1, region_name+': 0', curses.A_NORMAL)
+        region_count = region_count + 1
 
     
     while n:
-        print(n.get())
+        (region_name, log_count) = n.get()
+        stdscr.addstr(int(regionindex[region_name]), 1, region_name+': '+ str(log_count), curses.A_NORMAL)
+        if stdscr.getch() == ord('q'):
+            curses.endwin()
+            sys.exit()
+    curses.endwin()
+    sys.exit()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='This script will fetch the last 90 days of cloudtrail logs.')
