@@ -4,6 +4,7 @@
 # For org created trails in buckets you will need to download that bucket
 # V2 of this script now iterates through all regions
 # V3 of this script now uses multiprocess to download from all regions at the same time
+# V4 of this script uses curses to provide updates as to the download progress
 # Copyright: David Cowen 2022
 
 from __future__ import print_function
@@ -67,6 +68,8 @@ def regionDownload(access_key_id, secret_access_key, session_token, region_name,
             StartingToken = page['NextToken']
         except KeyError:
             continue
+    conn.put([region_name, 'done'])
+    conn.close()
 
     
 
@@ -103,6 +106,8 @@ def main(args):
     regions = client.describe_regions()
     regionindex = {}
     region_count = 2
+    regions_done = 0
+
     n = multiprocessing.Queue()
 
     for region in regions['Regions']:
@@ -113,8 +118,10 @@ def main(args):
         region_count = region_count + 1
 
     
-    while n:
+    while regions_done < region_count -2:
         (region_name, log_count) = n.get()
+        if log_count == "done":
+            regions_done = regions_done +1
         stdscr.addstr(int(regionindex[region_name]), 1, region_name+': '+ str(log_count), curses.A_NORMAL)
         if stdscr.getch() == ord('q'):
             curses.endwin()
