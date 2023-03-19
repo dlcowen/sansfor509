@@ -15,7 +15,7 @@ $storageTable = Get-AzStorageTable -Name $tableName -Context $context
 $cloudTable = $storageTable.CloudTable
 
 # Read the table
-$entry=Get-AzTableRow -table $cloudTable | ft
+$entry=Get-AzTableRow -table $cloudTable
 
 # Extract the RawXml column to a text file
 $entry.RawXml | out-file "WADWindowsEventLogsTable.xml" -encoding utf8
