@@ -44,8 +44,8 @@ options:
   --apps APPS, -a APPS  Comma separated list of applications whose logs will be downloaded. Or 'all' to attempt to
                         download all available logs
   --from-date FROM_DATE
-                        Only capture log entries from the specified date (suggest using yyyy-mm-dd format, although
-                        other formats may be accepted.).
+                        Only capture log entries from the specified date [yyyy-mm-dd format]. This flag is ignored
+                        if --update is set and existing files are already present.
   --update, -u          Update existing log files (if present). This will only save new log records.
   --overwrite           Overwrite existing log files (if present), with all available (or requested) log records.
   --quiet, -q           Prevent all output except errors

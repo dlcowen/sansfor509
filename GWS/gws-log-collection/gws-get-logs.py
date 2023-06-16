@@ -84,8 +84,8 @@ class Google(object):
             output_file = f"{self.output_path}/{app}_logs.json"
 
             # Get most recent log entry date (if required)
-            if self.update and not from_date:
-                from_date = self._check_recent_date(output_file)
+            if self.update:
+                from_date = self._check_recent_date(output_file) or from_date
 
             # Collect logs for specified app
             logging.info(f"Collecting logs for {app}...")
@@ -156,7 +156,7 @@ if __name__ == '__main__':
     
     parser.add_argument('--from-date', required=False, default=None,
                         type=lambda s: dateparser.parse(s).replace(tzinfo=tz.gettz('UTC')),
-                        help="Only capture log entries from the specified date (suggest using yyyy-mm-dd format, although other formats may be accepted.).")
+                        help="Only capture log entries from the specified date [yyyy-mm-dd format]. This flag is ignored if --update is set and existing files are already present.")
 
     # Update/overwrite behaviour
     parser.add_argument('--update', '-u', required=False, action="store_true",
