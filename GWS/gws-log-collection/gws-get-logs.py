@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from __future__ import print_function
 import json
 import requests
@@ -6,7 +7,7 @@ import argparse
 import logging
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
-from dateutil import parser as dateparser
+from dateutil import parser as dateparser, tz
 
 
 class Google(object):
@@ -70,7 +71,7 @@ class Google(object):
 
         return service
     
-    def get_logs(self):
+    def get_logs(self, from_date=None):
         """ 
         Collect all logs from specified applications
         """
@@ -83,18 +84,19 @@ class Google(object):
             output_file = f"{self.output_path}/{app}_logs.json"
 
             # Get most recent log entry date (if required)
-            most_recent_entry_date = self._check_recent_date(output_file) if self.update else None
+            if self.update:
+                from_date = self._check_recent_date(output_file) or from_date
 
             # Collect logs for specified app
             logging.info(f"Collecting logs for {app}...")
-            if self.update and most_recent_entry_date:
-                logging.debug(f"Only extracting records after {most_recent_entry_date}")
+            if from_date:
+                logging.debug(f"Only extracting records after {from_date}")
 
             saved, found = self._get_activity_logs(
                 app, 
                 output_file=output_file, 
                 overwrite=self.overwrite, 
-                only_after_datetime=most_recent_entry_date if self.update else None
+                only_after_datetime=from_date
             )
             logging.info(f"Saved {saved} of {found} entries for {app}")
             total_saved += saved
@@ -152,19 +154,23 @@ if __name__ == '__main__':
                         help="Comma separated list of applications whose logs will be downloaded. "
                          "Or 'all' to attempt to download all available logs")
     
+    parser.add_argument('--from-date', required=False, default=None,
+                        type=lambda s: dateparser.parse(s).replace(tzinfo=tz.gettz('UTC')),
+                        help="Only capture log entries from the specified date [yyyy-mm-dd format]. This flag is ignored if --update is set and existing files are already present.")
+
     # Update/overwrite behaviour
     parser.add_argument('--update', '-u', required=False, action="store_true",
                         help="Update existing log files (if present). This will only save new log records.")
     parser.add_argument('--overwrite', required=False, action="store_true",
-                        help="Overwrite existing log files (if present), with all available log records.")
+                        help="Overwrite existing log files (if present), with all available (or requested) log records.")
     
     # Logging/output levels
     parser.add_argument('--quiet', '-q', dest="log_level", action='store_const',
                         const=logging.ERROR, default=logging.INFO,
                         help="Prevent all output except errors")
-    parser.add_argument('--debug', dest="log_level", action='store_const',
+    parser.add_argument('--debug', '-v', dest="log_level", action='store_const',
                         const=logging.DEBUG, default=logging.INFO,
-                        help="Show debug output.")
+                        help="Show debug/verbose output.")
 
     args = parser.parse_args()
 
@@ -192,4 +198,4 @@ if __name__ == '__main__':
 
     # Connect to Google API
     google = Google(**vars(args))
-    google.get_logs()
+    google.get_logs(args.from_date)
