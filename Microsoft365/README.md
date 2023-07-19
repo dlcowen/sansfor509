@@ -10,7 +10,7 @@ Import-PSSession $Session –DisableNameChecking –AllowClobber:$true
 ## Connect using MFA
 ```
 Install-Module –Name ExchangeOnlineManagement
-Import-Module ExchangeOnlineManagement; Get-Module ExhangeOnlineManagement
+Import-Module ExchangeOnlineManagement; Get-Module ExchangeOnlineManagement
 Connect-ExchangeOnline –UserPrincipalName <UPN> -ShowProgress $true
 ```
 
