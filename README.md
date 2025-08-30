@@ -6,7 +6,6 @@ You can [click this link](https://for509.com/schedule) to find details about upc
 
 ## Course Authors
 * [David Cowen](https://www.sans.org/profiles/david-cowen)
-* [Josh Lemon](https://www.sans.org/profiles/joshua-lemon)
 * [Pierre Lidome](https://www.sans.org/profiles/pierre-lidome)
 * [Megan Roddie](https://www.sans.org/profiles/megan-roddie/)
 
